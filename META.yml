@@ -1,0 +1,30 @@
+---
+abstract: 'Detects the minimum version of Perl required for your dist'
+author:
+  - 'Apocalypse <APOCAL@cpan.org>'
+build_requires:
+  Test::More: 0.94
+configure_requires:
+  Module::Build: 0.36
+dynamic_config: 0
+generated_by: 'Module::Build version 0.3607'
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: Dist-Zilla-Plugin-MinimumPerl
+provides:
+  Dist::Zilla::Plugin::MinimumPerl:
+    file: lib/Dist/Zilla/Plugin/MinimumPerl.pm
+    version: 0.01
+requires:
+  Dist::Zilla::Role::PrereqSource: 2.101170
+  Moose: 1.01
+  Perl::MinimumVersion: 1.24
+  perl: 5.008
+resources:
+  bugtracker: http://rt.cpan.org/NoAuth/Bugs.html?Dist=Dist-Zilla-Plugin-MinimumPerl
+  homepage: http://search.cpan.org/dist/Dist-Zilla-Plugin-MinimumPerl
+  license: http://dev.perl.org/licenses/
+  repository: http://github.com/apocalypse/perl-dist-zilla-plugin-minimumperl
+version: 0.01
