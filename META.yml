@@ -16,7 +16,7 @@ name: Dist-Zilla-Plugin-MinimumPerl
 provides:
   Dist::Zilla::Plugin::MinimumPerl:
     file: lib/Dist/Zilla/Plugin/MinimumPerl.pm
-    version: 0.01
+    version: 0.02
 requires:
   Dist::Zilla::Role::PrereqSource: 2.101170
   Moose: 1.01
@@ -27,4 +27,4 @@ resources:
   homepage: http://search.cpan.org/dist/Dist-Zilla-Plugin-MinimumPerl
   license: http://dev.perl.org/licenses/
   repository: http://github.com/apocalypse/perl-dist-zilla-plugin-minimumperl
-version: 0.01
+version: 0.02
