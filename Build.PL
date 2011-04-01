@@ -1,50 +1,43 @@
-# Build.PL
-use strict; use warnings;
-use Module::Build;
 
-my $build = Module::Build->new(
-	# look up Module::Build::API for the info!
-	'dynamic_config'	=> 0,
-	'module_name'		=> 'Dist::Zilla::Plugin::MinimumPerl',
-	'license'		=> 'perl',
+use strict;
+use warnings;
 
-	'dist_abstract'		=> 'Detects the minimum version of Perl required for your dist',
-	'dist_author'		=> 'Apocalypse <APOCAL@cpan.org>',
+use Module::Build 0.3601;
 
-	'create_packlist'	=> 1,
-	'create_makefile_pl'	=> 'traditional',
-	'create_readme'		=> 1,
-	'create_license'	=> 1,
-	'sign'			=> 0,
 
-	'test_files'		=> 't/*.t',
-
-	'build_requires'	=> {
-		'Test::More'	=> '0.94',
-	},
-
-	'requires'		=> {
-		# To use Dzil
-		'Dist::Zilla::Role::PrereqSource'	=> '2.101170',
-		'Moose'					=> '1.01',
-
-		# The main reason why we're here :)
-		'Perl::MinimumVersion'			=> '1.24',
-
-		# we need a recent perl
-		'perl'					=> '5.008',
-	},
-
-	# include the standard stuff in META.yml
-	'meta_merge'	=> {
-		'resources'	=> {
-			'license'	=> 'http://dev.perl.org/licenses/',
-			'homepage'	=> 'http://search.cpan.org/dist/Dist-Zilla-Plugin-MinimumPerl',
-			'bugtracker'	=> 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=Dist-Zilla-Plugin-MinimumPerl',
-			'repository'	=> 'http://github.com/apocalypse/perl-dist-zilla-plugin-minimumperl',
-		},
-	},
+my %module_build_args = (
+  'build_requires' => {
+    'File::Find' => '0',
+    'File::Temp' => '0',
+    'Module::Build' => '0.3601',
+    'Test::More' => '0.88'
+  },
+  'configure_requires' => {
+    'Module::Build' => '0.3601'
+  },
+  'dist_abstract' => 'Detects the minimum version of Perl required for your dist',
+  'dist_author' => [
+    'Apocalypse <APOCAL@cpan.org>'
+  ],
+  'dist_name' => 'Dist-Zilla-Plugin-MinimumPerl',
+  'dist_version' => '1.002',
+  'license' => 'perl',
+  'module_name' => 'Dist::Zilla::Plugin::MinimumPerl',
+  'recommends' => {},
+  'recursive_test_files' => 1,
+  'requires' => {
+    'Dist::Zilla::Role::FileFinderUser' => '4.102345',
+    'Dist::Zilla::Role::PrereqSource' => '4.102345',
+    'Moose' => '1.03',
+    'Moose::Util::TypeConstraints' => '1.01',
+    'MooseX::Types::Perl' => '0.101340',
+    'Perl::MinimumVersion' => '1.26',
+    'perl' => '5.006'
+  },
+  'script_files' => []
 );
 
-# all done!
+
+my $build = Module::Build->new(%module_build_args);
+
 $build->create_build_script;

@@ -1,0 +1,52 @@
+==============================
+9999-99-99 99:99:99 +0000 HEAD
+==============================
+
+  commit fe62279ca45a714a499ca591b4d9a382a539ac55
+  Author: Apocalypse <perl@0ne.us>
+  Date:   Thu Mar 31 21:22:31 2011 -0700
+  
+    tidy POD
+
+  commit d74e462b957b505f4d80d270ec656d719b4a2cb3
+  Author: Apocalypse <perl@0ne.us>
+  Date:   Tue Dec 7 19:55:11 2010 -0700
+  
+    new release tarball 
+
+=======================================
+2010-12-07 19:54:38 -0700 release-1.001
+=======================================
+
+  commit 68443286dc13a4880deead1824d2fc50a81e2770
+  Author: Apocalypse <perl@0ne.us>
+  Date:   Tue Dec 7 19:54:38 2010 -0700
+  
+    New CPAN release of Dist-Zilla-Plugin-MinimumPerl - v1.001
+
+    Released: 2010-12-08 02:54:32 UTC
+
+    Converted to Dist::Zilla for the release process!
+
+    Updated to support Dist::Zilla v4
+
+    Use MooseX::Types::Perl to validate the perl attr
+
+    Now scans only the t/, lib/, and executable files for perl code (
+    thanks DAGOLDEN ) 
+
+=======================================
+2010-12-07 19:52:06 -0700 release-1.000
+=======================================
+
+  commit b8689104321706cf652cc6a2f49766e4c76494a4
+  Author: Apocalypse <perl@0ne.us>
+  Date:   Tue Dec 7 19:52:06 2010 -0700
+  
+    New CPAN release of Dist-Zilla-Plugin-MinimumPerl - v1.000
+
+    Released: 2010-12-08 02:52:00 UTC 
+
+===================================
+End of changes in the last 365 days
+===================================
