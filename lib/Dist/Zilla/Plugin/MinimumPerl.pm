@@ -9,7 +9,7 @@
 use strict; use warnings;
 package Dist::Zilla::Plugin::MinimumPerl;
 BEGIN {
-  $Dist::Zilla::Plugin::MinimumPerl::VERSION = '1.002';
+  $Dist::Zilla::Plugin::MinimumPerl::VERSION = '1.003';
 }
 BEGIN {
   $Dist::Zilla::Plugin::MinimumPerl::AUTHORITY = 'cpan:APOCAL';
@@ -34,7 +34,7 @@ with(
 	use Moose::Util::TypeConstraints 1.01;
 
 	has perl => (
-		is => 'ro',
+		is => 'rw',
 		isa => subtype( 'Str'
 			=> where { LaxVersionStr->check( $_ ) }
 			=> message { "Perl must be in a valid version format - see version.pm" }
@@ -64,6 +64,11 @@ sub register_prereqs {
 		# Use Perl::MinimumVersion to scan all files
 		my $minver;
 		foreach my $file ( @{ $self->found_files } ) {
+			# TODO should we scan the content for the perl shebang?
+			# Only check .t and .pm/pl files, thanks RT#67355 and DOHERTY
+			next unless $file->name =~ /\.(?:t|p[ml])$/i;
+
+			# TODO skip "bad" files and not die, just warn?
 			my $pmv = Perl::MinimumVersion->new( \$file->content );
 			if ( ! defined $pmv ) {
 				$self->log_fatal( "Unable to parse '" . $file->name . "'" );
@@ -79,10 +84,14 @@ sub register_prereqs {
 
 		# Write out the minimum perl found
 		if ( defined $minver ) {
-			$self->log_debug( 'Determined that the MinimumPerl required is v' . $minver->stringify );
+			# Cache it so we don't have to scan again if we're called more than 1 time
+			# TODO this happens with Dist::Zilla::Util::EmulatePhase which is loaded by Dist::Zilla::Plugin::MetaData::BuiltWith
+			$self->perl( $minver->stringify );
+
+			$self->log_debug( 'Determined that the MinimumPerl required is v' . $self->perl );
 			$self->zilla->register_prereqs(
 				{ phase => 'runtime' },
-				'perl' => $minver->stringify,
+				'perl' => $self->perl,
 			);
 		} else {
 			$self->log_fatal( 'Found no perl files, check your dist?' );
@@ -111,7 +120,7 @@ Dist::Zilla::Plugin::MinimumPerl - Detects the minimum version of Perl required 
 
 =head1 VERSION
 
-  This document describes v1.002 of Dist::Zilla::Plugin::MinimumPerl - released March 31, 2011 as part of Dist-Zilla-Plugin-MinimumPerl.
+  This document describes v1.003 of Dist::Zilla::Plugin::MinimumPerl - released April 21, 2011 as part of Dist-Zilla-Plugin-MinimumPerl.
 
 =head1 DESCRIPTION
 
@@ -120,6 +129,9 @@ for your dist and adds it to the prereqs.
 
 	# In your dist.ini:
 	[MinimumPerl]
+
+This plugin will search for files matching C</\.(t|pl|pm)$/i> in the C<lib/>, C<bin/>, and C<t/> directories.
+If you need it to scan a different directory and/or a different extension please let me know.
 
 =head1 ATTRIBUTES
 

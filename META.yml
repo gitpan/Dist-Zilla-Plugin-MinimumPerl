@@ -23,7 +23,7 @@ no_index:
 provides:
   Dist::Zilla::Plugin::MinimumPerl:
     file: lib/Dist/Zilla/Plugin/MinimumPerl.pm
-    version: 1.002
+    version: 1.003
 requires:
   Dist::Zilla::Role::FileFinderUser: 4.102345
   Dist::Zilla::Role::PrereqSource: 4.102345
@@ -37,7 +37,7 @@ resources:
   homepage: http://search.cpan.org/dist/Dist-Zilla-Plugin-MinimumPerl/
   license: http://dev.perl.org/licenses/
   repository: git://github.com/apocalypse/perl-dist-zilla-plugin-minimumperl.git
-version: 1.002
+version: 1.003
 x_BuiltWith:
   modules:
     Dist::Zilla::Role::FileFinderUser: 4.200005
@@ -48,7 +48,7 @@ x_BuiltWith:
     Moose: 1.21
     Moose::Util::TypeConstraints: 1.21
     MooseX::Types::Perl: 0.101340
-    Perl::MinimumVersion: 1.26
+    Perl::MinimumVersion: 1.28
     Test::More: 0.96
     perl: 'NA(skipped: perl)'
   perl:
@@ -105,7 +105,7 @@ x_Dist_Zilla:
     -
       class: Dist::Zilla::Plugin::Authority
       name: '@Apocalyptic/Authority'
-      version: 1.003
+      version: 1.005
     -
       class: Dist::Zilla::Plugin::PkgVersion
       name: '@Apocalyptic/PkgVersion'
@@ -125,7 +125,7 @@ x_Dist_Zilla:
     -
       class: Dist::Zilla::Plugin::MinimumPerl
       name: '@Apocalyptic/MinimumPerl'
-      version: 1.001
+      version: 1.003
     -
       class: Dist::Zilla::Plugin::Bugtracker
       name: '@Apocalyptic/Bugtracker'

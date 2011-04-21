@@ -32,7 +32,7 @@ my %WriteMakefileArgs = (
     'MooseX::Types::Perl' => '0.101340',
     'Perl::MinimumVersion' => '1.26'
   },
-  'VERSION' => '1.002',
+  'VERSION' => '1.003',
   'test' => {
     'TESTS' => 't/*.t'
   }

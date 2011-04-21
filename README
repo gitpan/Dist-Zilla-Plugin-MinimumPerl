@@ -3,7 +3,7 @@ NAME
     required for your dist
 
 VERSION
-      This document describes v1.002 of Dist::Zilla::Plugin::MinimumPerl - released March 31, 2011 as part of Dist-Zilla-Plugin-MinimumPerl.
+      This document describes v1.003 of Dist::Zilla::Plugin::MinimumPerl - released April 21, 2011 as part of Dist-Zilla-Plugin-MinimumPerl.
 
 DESCRIPTION
     This plugin uses Perl::MinimumVersion to automatically find the minimum
@@ -11,6 +11,10 @@ DESCRIPTION
 
             # In your dist.ini:
             [MinimumPerl]
+
+    This plugin will search for files matching "/\.(t|pl|pm)$/i" in the
+    "lib/", "bin/", and "t/" directories. If you need it to scan a different
+    directory and/or a different extension please let me know.
 
 ATTRIBUTES
   perl
