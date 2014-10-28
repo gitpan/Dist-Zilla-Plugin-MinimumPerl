@@ -1,19 +1,16 @@
 #
 # This file is part of Dist-Zilla-Plugin-MinimumPerl
 #
-# This software is copyright (c) 2011 by Apocalypse.
+# This software is copyright (c) 2014 by Apocalypse.
 #
 # This is free software; you can redistribute it and/or modify it under
 # the same terms as the Perl 5 programming language system itself.
 #
 use strict; use warnings;
 package Dist::Zilla::Plugin::MinimumPerl;
-BEGIN {
-  $Dist::Zilla::Plugin::MinimumPerl::VERSION = '1.003';
-}
-BEGIN {
-  $Dist::Zilla::Plugin::MinimumPerl::AUTHORITY = 'cpan:APOCAL';
-}
+# git description: release-1.003-10-g1cbe128
+$Dist::Zilla::Plugin::MinimumPerl::VERSION = '1.004';
+our $AUTHORITY = 'cpan:APOCAL';
 
 # ABSTRACT: Detects the minimum version of Perl required for your dist
 
@@ -22,19 +19,41 @@ use Perl::MinimumVersion 1.26;
 use MooseX::Types::Perl 0.101340 qw( LaxVersionStr );
 
 with(
-	'Dist::Zilla::Role::PrereqSource' => { -version => '4.102345' },
+	'Dist::Zilla::Role::PrereqSource' => { -version => '5.006' }, # for the updated encoding system in dzil, RJBS++
 	'Dist::Zilla::Role::FileFinderUser' => {
-		-version => '4.102345',
-		default_finders => [ ':InstallModules', ':ExecFiles', ':TestFiles' ]
+		-version => '4.200006',	# for :IncModules
+		finder_arg_names => [ 'perl_Modules' ],
+		method => 'found_modules',
+		default_finders => [ ':InstallModules' ]
+	},
+	'Dist::Zilla::Role::FileFinderUser' => {
+		finder_arg_names => [ 'perl_Tests' ],
+		method => 'found_tests',
+		default_finders => [ ':TestFiles' ]
+	},
+	'Dist::Zilla::Role::FileFinderUser' => {
+		finder_arg_names => [ 'perl_Inc' ],
+		method => 'found_inc',
+		default_finders => [ ':IncModules' ]
 	},
 );
 
+#pod =attr perl
+#pod
+#pod Specify a version of perl required for the dist. Please specify it in a format that Build.PL/Makefile.PL understands!
+#pod If this is specified, this module will not attempt to automatically detect the minimum version of Perl.
+#pod
+#pod The default is: undefined ( automatically detect it )
+#pod
+#pod Example: 5.008008
+#pod
+#pod =cut
 
 {
 	use Moose::Util::TypeConstraints 1.01;
 
 	has perl => (
-		is => 'rw',
+		is => 'ro',
 		isa => subtype( 'Str'
 			=> where { LaxVersionStr->check( $_ ) }
 			=> message { "Perl must be in a valid version format - see version.pm" }
@@ -45,6 +64,12 @@ with(
 	no Moose::Util::TypeConstraints;
 }
 
+has _scanned_perl => (
+	is => 'ro',
+	isa => 'HashRef',
+	default => sub { {} },
+);
+
 sub register_prereqs {
 	my ($self) = @_;
 
@@ -52,65 +77,82 @@ sub register_prereqs {
 
 	# Okay, did the user set a perl version explicitly?
 	if ( $self->_has_perl ) {
-		# Add it to prereqs!
-		$self->zilla->register_prereqs(
-			{ phase => 'runtime' },
-			'perl' => $self->perl,
-		);
-	} else {
-		# TODO should we split up the prereq into test / runtime ?
-		# see http://rt.cpan.org/Public/Bug/Display.html?id=61028
-
-		# Use Perl::MinimumVersion to scan all files
-		my $minver;
-		foreach my $file ( @{ $self->found_files } ) {
-			# TODO should we scan the content for the perl shebang?
-			# Only check .t and .pm/pl files, thanks RT#67355 and DOHERTY
-			next unless $file->name =~ /\.(?:t|p[ml])$/i;
-
-			# TODO skip "bad" files and not die, just warn?
-			my $pmv = Perl::MinimumVersion->new( \$file->content );
-			if ( ! defined $pmv ) {
-				$self->log_fatal( "Unable to parse '" . $file->name . "'" );
-			}
-			my $ver = $pmv->minimum_version;
-			if ( ! defined $ver ) {
-				$self->log_fatal( "Unable to extract MinimumPerl from '" . $file->name . "'" );
-			}
-			if ( ! defined $minver or $ver > $minver ) {
-				$minver = $ver;
-			}
-		}
-
-		# Write out the minimum perl found
-		if ( defined $minver ) {
-			# Cache it so we don't have to scan again if we're called more than 1 time
-			# TODO this happens with Dist::Zilla::Util::EmulatePhase which is loaded by Dist::Zilla::Plugin::MetaData::BuiltWith
-			$self->perl( $minver->stringify );
-
-			$self->log_debug( 'Determined that the MinimumPerl required is v' . $self->perl );
+		foreach my $p ( qw( runtime configure test ) ) {
 			$self->zilla->register_prereqs(
-				{ phase => 'runtime' },
+				{ phase => $p },
 				'perl' => $self->perl,
 			);
-		} else {
-			$self->log_fatal( 'Found no perl files, check your dist?' );
 		}
+	} else {
+		# Go through our 3 phases
+		$self->_scan_file( 'runtime', $_ ) for @{ $self->found_modules };
+		$self->_finalize( 'runtime' );
+		$self->_scan_file( 'configure', $_ ) for @{ $self->found_inc };
+		$self->_finalize( 'configure' );
+		$self->_scan_file( 'test', $_ ) for @{ $self->found_tests };
+		$self->_finalize( 'test' );
 	}
+}
+
+sub _scan_file {
+	my( $self, $phase, $file ) = @_;
+
+	# We don't parse files marked with the 'bytes' encoding as they're special - see RT#96071
+	return if $file->is_bytes;
+
+	# TODO skip "bad" files and not die, just warn?
+	my $pmv = Perl::MinimumVersion->new( \$file->content );
+	if ( ! defined $pmv ) {
+		$self->log_fatal( "Unable to parse '" . $file->name . "'" );
+	}
+	my $ver = $pmv->minimum_version;
+	if ( ! defined $ver ) {
+		$self->log_fatal( "Unable to extract MinimumPerl from '" . $file->name . "'" );
+	}
+
+	# cache it, letting _finalize take care of it
+	if ( ! exists $self->_scanned_perl->{$phase} || $self->_scanned_perl->{$phase}->[0] < $ver ) {
+		$self->_scanned_perl->{$phase} = [ $ver, $file ];
+	}
+}
+
+sub _finalize {
+	my( $self, $phase ) = @_;
+
+	my $v;
+
+	# determine the version we will use
+	if ( ! exists $self->_scanned_perl->{$phase} ) {
+		# We don't complain for test and inc!
+		$self->log_fatal( 'Found no perl files, check your dist?' ) if $phase eq 'runtime';
+
+		# ohwell, we just copy the runtime perl
+		$self->log_debug( "Determined that the MinimumPerl required for '$phase' is v" . $self->_scanned_perl->{'runtime'}->[0] . " via defaulting to runtime" );
+		$v = $self->_scanned_perl->{'runtime'}->[0];
+	} else {
+		$self->log_debug( "Determined that the MinimumPerl required for '$phase' is v" . $self->_scanned_perl->{$phase}->[0] . " via " .  $self->_scanned_perl->{$phase}->[1]->name );
+		$v = $self->_scanned_perl->{$phase}->[0];
+	}
+
+	$self->zilla->register_prereqs(
+		{ phase => $phase },
+		'perl' => $v,
+	);
 }
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
 1;
 
-
 __END__
+
 =pod
 
-=for :stopwords Apocalypse cpan testmatrix url annocpan anno bugtracker rt cpants kwalitee
-diff irc mailto metadata placeholders dist prereqs
+=encoding UTF-8
 
-=encoding utf-8
+=for :stopwords Apocalypse Melo Mengué Olivier Pedro cpan testmatrix url annocpan anno
+bugtracker rt cpants kwalitee diff irc mailto metadata placeholders
+metacpan dist prereqs
 
 =for Pod::Coverage register_prereqs
 
@@ -120,7 +162,7 @@ Dist::Zilla::Plugin::MinimumPerl - Detects the minimum version of Perl required 
 
 =head1 VERSION
 
-  This document describes v1.003 of Dist::Zilla::Plugin::MinimumPerl - released April 21, 2011 as part of Dist-Zilla-Plugin-MinimumPerl.
+  This document describes v1.004 of Dist::Zilla::Plugin::MinimumPerl - released October 27, 2014 as part of Dist-Zilla-Plugin-MinimumPerl.
 
 =head1 DESCRIPTION
 
@@ -130,7 +172,7 @@ for your dist and adds it to the prereqs.
 	# In your dist.ini:
 	[MinimumPerl]
 
-This plugin will search for files matching C</\.(t|pl|pm)$/i> in the C<lib/>, C<bin/>, and C<t/> directories.
+This plugin will search for files matching C</\.(t|pl|pm)$/i> in the C<lib/>, C<inc/>, and C<t/> directories.
 If you need it to scan a different directory and/or a different extension please let me know.
 
 =head1 ATTRIBUTES
@@ -154,6 +196,10 @@ Please see those modules/websites for more information related to this module.
 
 L<Dist::Zilla|Dist::Zilla>
 
+=item *
+
+L<Dist::Zilla::Plugin::MinimumPerlFast|Dist::Zilla::Plugin::MinimumPerlFast>
+
 =back
 
 =head1 SUPPORT
@@ -173,7 +219,17 @@ in addition to those websites please use your favorite search engine to discover
 
 =item *
 
+MetaCPAN
+
+A modern, open-source CPAN search engine, useful to view POD in HTML format.
+
+L<http://metacpan.org/release/Dist-Zilla-Plugin-MinimumPerl>
+
+=item *
+
 Search CPAN
+
+The default CPAN search engine, useful to view POD in HTML format.
 
 L<http://search.cpan.org/dist/Dist-Zilla-Plugin-MinimumPerl>
 
@@ -181,11 +237,15 @@ L<http://search.cpan.org/dist/Dist-Zilla-Plugin-MinimumPerl>
 
 RT: CPAN's Bug Tracker
 
+The RT ( Request Tracker ) website is the default bug/issue tracking system for CPAN.
+
 L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Dist-Zilla-Plugin-MinimumPerl>
 
 =item *
 
-AnnoCPAN: Annotated CPAN documentation
+AnnoCPAN
+
+The AnnoCPAN is a website that allows community annotations of Perl module documentation.
 
 L<http://annocpan.org/dist/Dist-Zilla-Plugin-MinimumPerl>
 
@@ -193,31 +253,49 @@ L<http://annocpan.org/dist/Dist-Zilla-Plugin-MinimumPerl>
 
 CPAN Ratings
 
+The CPAN Ratings is a website that allows community ratings and reviews of Perl modules.
+
 L<http://cpanratings.perl.org/d/Dist-Zilla-Plugin-MinimumPerl>
 
 =item *
 
 CPAN Forum
 
+The CPAN Forum is a web forum for discussing Perl modules.
+
 L<http://cpanforum.com/dist/Dist-Zilla-Plugin-MinimumPerl>
 
 =item *
 
-CPANTS Kwalitee
+CPANTS
 
-L<http://cpants.perl.org/dist/overview/Dist-Zilla-Plugin-MinimumPerl>
+The CPANTS is a website that analyzes the Kwalitee ( code metrics ) of a distribution.
+
+L<http://cpants.cpanauthors.org/dist/overview/Dist-Zilla-Plugin-MinimumPerl>
 
 =item *
 
-CPAN Testers Results
+CPAN Testers
 
-L<http://cpantesters.org/distro/D/Dist-Zilla-Plugin-MinimumPerl.html>
+The CPAN Testers is a network of smokers who run automated tests on uploaded CPAN distributions.
+
+L<http://www.cpantesters.org/distro/D/Dist-Zilla-Plugin-MinimumPerl>
 
 =item *
 
 CPAN Testers Matrix
 
+The CPAN Testers Matrix is a website that provides a visual overview of the test results for a distribution on various Perls/platforms.
+
 L<http://matrix.cpantesters.org/?dist=Dist-Zilla-Plugin-MinimumPerl>
+
+=item *
+
+CPAN Testers Dependencies
+
+The CPAN Testers Dependencies is a website that shows a chart of the test results of all dependencies for a distribution.
+
+L<http://deps.cpantesters.org/?module=Dist::Zilla::Plugin::MinimumPerl>
 
 =back
 
@@ -266,7 +344,7 @@ The code is open to the world, and available for you to hack on. Please feel fre
 with it, or whatever. If you want to contribute patches, please send me a diff or prod me to pull
 from your repository :)
 
-L<http://github.com/apocalypse/perl-dist-zilla-plugin-minimumperl>
+L<https://github.com/apocalypse/perl-dist-zilla-plugin-minimumperl>
 
   git clone git://github.com/apocalypse/perl-dist-zilla-plugin-minimumperl.git
 
@@ -274,37 +352,51 @@ L<http://github.com/apocalypse/perl-dist-zilla-plugin-minimumperl>
 
 Apocalypse <APOCAL@cpan.org>
 
+=head2 CONTRIBUTORS
+
+=for stopwords Olivier Mengué Pedro Melo
+
+=over 4
+
+=item *
+
+Olivier Mengué <dolmen@cpan.org>
+
+=item *
+
+Pedro Melo <melo@simplicidade.org>
+
+=back
+
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2011 by Apocalypse.
+This software is copyright (c) 2014 by Apocalypse.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
-The full text of the license can be found in the LICENSE file included with this distribution.
+The full text of the license can be found in the
+F<LICENSE> file included with this distribution.
 
 =head1 DISCLAIMER OF WARRANTY
 
-BECAUSE THIS SOFTWARE IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY
-FOR THE SOFTWARE, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT
-WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER
-PARTIES PROVIDE THE SOFTWARE "AS IS" WITHOUT WARRANTY OF ANY KIND,
-EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE
-SOFTWARE IS WITH YOU. SHOULD THE SOFTWARE PROVE DEFECTIVE, YOU ASSUME
-THE COST OF ALL NECESSARY SERVICING, REPAIR, OR CORRECTION.
+THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY
+APPLICABLE LAW.  EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT
+HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM "AS IS" WITHOUT WARRANTY
+OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE.  THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM
+IS WITH YOU.  SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF
+ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
 
 IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
-WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR
-REDISTRIBUTE THE SOFTWARE AS PERMITTED BY THE ABOVE LICENCE, BE LIABLE
-TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL, OR
-CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE THE
-SOFTWARE (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING
-RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A
-FAILURE OF THE SOFTWARE TO OPERATE WITH ANY OTHER SOFTWARE), EVEN IF
-SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
-DAMAGES.
+WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS
+THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY
+GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE
+USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF
+DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD
+PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS),
+EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGES.
 
 =cut
-
