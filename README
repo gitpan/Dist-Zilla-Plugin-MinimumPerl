@@ -5,7 +5,7 @@ NAME
 
 VERSION
 
-      This document describes v1.004 of Dist::Zilla::Plugin::MinimumPerl - released October 27, 2014 as part of Dist-Zilla-Plugin-MinimumPerl.
+      This document describes v1.005 of Dist::Zilla::Plugin::MinimumPerl - released October 31, 2014 as part of Dist-Zilla-Plugin-MinimumPerl.
 
 DESCRIPTION
 
@@ -178,6 +178,8 @@ AUTHOR
     Apocalypse <APOCAL@cpan.org>
 
  CONTRIBUTORS
+
+      * Nigel Gregoire <nigelg@airg.com>
 
       * Olivier Mengué <dolmen@cpan.org>
 

@@ -16,6 +16,12 @@
   </developer>
   <helper>
     <foaf:Person>
+      <foaf:name>Nigel Gregoire</foaf:name>
+      <foaf:mbox rdf:resource="mailto:nigelg@airg.com" />
+    </foaf:Person>
+  </helper>
+  <helper>
+    <foaf:Person>
       <foaf:name>Olivier Mengué</foaf:name>
       <foaf:mbox rdf:resource="mailto:dolmen@cpan.org" />
     </foaf:Person>

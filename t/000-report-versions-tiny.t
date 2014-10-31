@@ -50,11 +50,12 @@ sub pmver {
 
 eval { $v .= pmver('Dist::Zilla::Role::FileFinderUser','4.200006') };
 eval { $v .= pmver('Dist::Zilla::Role::PrereqSource','5.006') };
+eval { $v .= pmver('ExtUtils::MakeMaker','any version') };
 eval { $v .= pmver('File::Spec','any version') };
 eval { $v .= pmver('File::Temp','any version') };
 eval { $v .= pmver('IO::Handle','any version') };
 eval { $v .= pmver('IPC::Open3','any version') };
-eval { $v .= pmver('Module::Build','0.28') };
+eval { $v .= pmver('Module::Build::Tiny','0.039') };
 eval { $v .= pmver('Moose','1.03') };
 eval { $v .= pmver('Moose::Util::TypeConstraints','1.01') };
 eval { $v .= pmver('MooseX::Types::Perl','0.101340') };

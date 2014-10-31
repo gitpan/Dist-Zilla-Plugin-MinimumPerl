@@ -8,8 +8,8 @@
 #
 use strict; use warnings;
 package Dist::Zilla::Plugin::MinimumPerl;
-# git description: release-1.003-10-g1cbe128
-$Dist::Zilla::Plugin::MinimumPerl::VERSION = '1.004';
+# git description: release-1.004-3-ga1491f9
+$Dist::Zilla::Plugin::MinimumPerl::VERSION = '1.005';
 our $AUTHORITY = 'cpan:APOCAL';
 
 # ABSTRACT: Detects the minimum version of Perl required for your dist
@@ -99,6 +99,8 @@ sub _scan_file {
 
 	# We don't parse files marked with the 'bytes' encoding as they're special - see RT#96071
 	return if $file->is_bytes;
+	# Only check .t and .pm/pl files, thanks RT#67355 and DOHERTY
+	return unless $file->name =~ /\.(?:t|p[ml])$/i;
 
 	# TODO skip "bad" files and not die, just warn?
 	my $pmv = Perl::MinimumVersion->new( \$file->content );
@@ -150,9 +152,8 @@ __END__
 
 =encoding UTF-8
 
-=for :stopwords Apocalypse Melo Mengué Olivier Pedro cpan testmatrix url annocpan anno
-bugtracker rt cpants kwalitee diff irc mailto metadata placeholders
-metacpan dist prereqs
+=for :stopwords Apocalypse cpan testmatrix url annocpan anno bugtracker rt cpants kwalitee
+diff irc mailto metadata placeholders metacpan dist prereqs
 
 =for Pod::Coverage register_prereqs
 
@@ -162,7 +163,7 @@ Dist::Zilla::Plugin::MinimumPerl - Detects the minimum version of Perl required 
 
 =head1 VERSION
 
-  This document describes v1.004 of Dist::Zilla::Plugin::MinimumPerl - released October 27, 2014 as part of Dist-Zilla-Plugin-MinimumPerl.
+  This document describes v1.005 of Dist::Zilla::Plugin::MinimumPerl - released October 31, 2014 as part of Dist-Zilla-Plugin-MinimumPerl.
 
 =head1 DESCRIPTION
 
@@ -354,9 +355,13 @@ Apocalypse <APOCAL@cpan.org>
 
 =head2 CONTRIBUTORS
 
-=for stopwords Olivier Mengué Pedro Melo
+=for stopwords Nigel Gregoire Olivier Mengué Pedro Melo
 
 =over 4
+
+=item *
+
+Nigel Gregoire <nigelg@airg.com>
 
 =item *
 

@@ -4,7 +4,7 @@
       "Apocalypse <APOCAL@cpan.org>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Dist::Zilla version 5.021, CPAN::Meta::Converter version 2.142690",
+   "generated_by" : "Dist::Zilla version 5.023, CPAN::Meta::Converter version 2.142690",
    "license" : [
       "perl_5"
    ],
@@ -19,14 +19,10 @@
       ]
    },
    "prereqs" : {
-      "build" : {
-         "requires" : {
-            "Module::Build" : "0.28"
-         }
-      },
       "configure" : {
          "requires" : {
-            "Module::Build" : "0.28",
+            "ExtUtils::MakeMaker" : "0",
+            "Module::Build::Tiny" : "0.039",
             "perl" : "5.006"
          }
       },
@@ -62,7 +58,7 @@
    "provides" : {
       "Dist::Zilla::Plugin::MinimumPerl" : {
          "file" : "lib/Dist/Zilla/Plugin/MinimumPerl.pm",
-         "version" : "1.004"
+         "version" : "1.005"
       }
    },
    "release_status" : "stable",
@@ -81,16 +77,17 @@
          "web" : "https://github.com/apocalypse/perl-dist-zilla-plugin-minimumperl"
       }
    },
-   "version" : "1.004",
+   "version" : "1.005",
    "x_BuiltWith" : {
       "modules" : {
-         "Dist::Zilla::Role::FileFinderUser" : "5.021",
-         "Dist::Zilla::Role::PrereqSource" : "5.021",
+         "Dist::Zilla::Role::FileFinderUser" : "5.023",
+         "Dist::Zilla::Role::PrereqSource" : "5.023",
+         "ExtUtils::MakeMaker" : "7.00",
          "File::Spec" : "3.47",
          "File::Temp" : "0.2304",
          "IO::Handle" : "1.34",
          "IPC::Open3" : "1.13",
-         "Module::Build" : "0.4210",
+         "Module::Build::Tiny" : "0.039",
          "Moose" : "2.1213",
          "Moose::Util::TypeConstraints" : "2.1213",
          "MooseX::Types::Perl" : "0.101343",
@@ -159,22 +156,22 @@
          {
             "class" : "Dist::Zilla::Plugin::PruneCruft",
             "name" : "@Apocalyptic/PruneCruft",
-            "version" : "5.021"
+            "version" : "5.023"
          },
          {
             "class" : "Dist::Zilla::Plugin::AutoPrereqs",
             "name" : "@Apocalyptic/AutoPrereqs",
-            "version" : "5.021"
+            "version" : "5.023"
          },
          {
             "class" : "Dist::Zilla::Plugin::GenerateFile",
             "name" : "@Apocalyptic/MANIFEST.SKIP",
-            "version" : "5.021"
+            "version" : "5.023"
          },
          {
             "class" : "Dist::Zilla::Plugin::ManifestSkip",
             "name" : "@Apocalyptic/ManifestSkip",
-            "version" : "5.021"
+            "version" : "5.023"
          },
          {
             "class" : "Dist::Zilla::Plugin::Test::Compile",
@@ -216,7 +213,7 @@
          {
             "class" : "Dist::Zilla::Plugin::Authority",
             "name" : "@Apocalyptic/Authority",
-            "version" : "1.008"
+            "version" : "1.009"
          },
          {
             "class" : "Dist::Zilla::Plugin::Git::Describe",
@@ -226,7 +223,7 @@
          {
             "class" : "Dist::Zilla::Plugin::PkgVersion",
             "name" : "@Apocalyptic/PkgVersion",
-            "version" : "5.021"
+            "version" : "5.023"
          },
          {
             "class" : "Dist::Zilla::Plugin::PodWeaver",
@@ -369,7 +366,7 @@
          {
             "class" : "Dist::Zilla::Plugin::NextRelease",
             "name" : "@Apocalyptic/NextRelease",
-            "version" : "5.021"
+            "version" : "5.023"
          },
          {
             "class" : "Dist::Zilla::Plugin::ChangelogFromGit",
@@ -394,12 +391,20 @@
          {
             "class" : "Dist::Zilla::Plugin::MetaConfig",
             "name" : "@Apocalyptic/MetaConfig",
-            "version" : "5.021"
+            "version" : "5.023"
          },
          {
-            "class" : "Dist::Zilla::Plugin::ContributorsFromGit",
-            "name" : "@Apocalyptic/ContributorsFromGit",
-            "version" : "0.014"
+            "class" : "Dist::Zilla::Plugin::Git::Contributors",
+            "config" : {
+               "Dist::Zilla::Plugin::Git::Contributors" : {
+                  "include_authors" : "0",
+                  "include_releaser" : "1",
+                  "order_by" : "name",
+                  "paths" : []
+               }
+            },
+            "name" : "@Apocalyptic/Git::Contributors",
+            "version" : "0.008"
          },
          {
             "class" : "Dist::Zilla::Plugin::MetaData::BuiltWith",
@@ -429,12 +434,12 @@
          {
             "class" : "Dist::Zilla::Plugin::MetaResources",
             "name" : "@Apocalyptic/MetaResources",
-            "version" : "5.021"
+            "version" : "5.023"
          },
          {
             "class" : "Dist::Zilla::Plugin::MetaNoIndex",
             "name" : "@Apocalyptic/MetaNoIndex",
-            "version" : "5.021"
+            "version" : "5.023"
          },
          {
             "class" : "Dist::Zilla::Plugin::MetaProvides::Package",
@@ -444,7 +449,7 @@
                      {
                         "class" : "Dist::Zilla::Plugin::FinderCode",
                         "name" : "@Apocalyptic/MetaProvides::Package/AUTOVIV/:InstallModulesPM",
-                        "version" : "5.021"
+                        "version" : "5.023"
                      }
                   ]
                },
@@ -460,42 +465,37 @@
          {
             "class" : "Dist::Zilla::Plugin::License",
             "name" : "@Apocalyptic/License",
-            "version" : "5.021"
+            "version" : "5.023"
          },
          {
-            "class" : "Dist::Zilla::Plugin::MakeMaker",
+            "class" : "Dist::Zilla::Plugin::ModuleBuildTiny",
             "config" : {
                "Dist::Zilla::Role::TestRunner" : {
                   "default_jobs" : 1
                }
             },
-            "name" : "@Apocalyptic/MakeMaker",
-            "version" : "5.021"
+            "name" : "@Apocalyptic/ModuleBuildTiny",
+            "version" : "0.008"
          },
          {
-            "class" : "Dist::Zilla::Plugin::ModuleBuild",
+            "class" : "Dist::Zilla::Plugin::MakeMaker::Fallback",
             "config" : {
                "Dist::Zilla::Role::TestRunner" : {
                   "default_jobs" : 1
                }
             },
-            "name" : "@Apocalyptic/ModuleBuild",
-            "version" : "5.021"
-         },
-         {
-            "class" : "Dist::Zilla::Plugin::DualBuilders",
-            "name" : "@Apocalyptic/DualBuilders",
-            "version" : "1.001"
+            "name" : "@Apocalyptic/MakeMaker::Fallback",
+            "version" : "0.014"
          },
          {
             "class" : "Dist::Zilla::Plugin::MetaYAML",
             "name" : "@Apocalyptic/MetaYAML",
-            "version" : "5.021"
+            "version" : "5.023"
          },
          {
             "class" : "Dist::Zilla::Plugin::MetaJSON",
             "name" : "@Apocalyptic/MetaJSON",
-            "version" : "5.021"
+            "version" : "5.023"
          },
          {
             "class" : "Dist::Zilla::Plugin::InstallGuide",
@@ -515,7 +515,7 @@
          {
             "class" : "Dist::Zilla::Plugin::CPANFile",
             "name" : "@Apocalyptic/CPANFile",
-            "version" : "5.021"
+            "version" : "5.023"
          },
          {
             "class" : "Dist::Zilla::Plugin::ReadmeAnyFromPod",
@@ -528,6 +528,11 @@
             "version" : "0.142470"
          },
          {
+            "class" : "Dist::Zilla::Plugin::ChangeStats::Git",
+            "name" : "@Apocalyptic/ChangeStats::Git",
+            "version" : "0.3.0"
+         },
+         {
             "class" : "Dist::Zilla::Plugin::Signature",
             "name" : "@Apocalyptic/Signature",
             "version" : "1.100930"
@@ -535,7 +540,7 @@
          {
             "class" : "Dist::Zilla::Plugin::Manifest",
             "name" : "@Apocalyptic/Manifest",
-            "version" : "5.021"
+            "version" : "5.023"
          },
          {
             "class" : "Dist::Zilla::Plugin::CheckChangesHasContent",
@@ -605,7 +610,7 @@
          {
             "class" : "Dist::Zilla::Plugin::TestRelease",
             "name" : "@Apocalyptic/TestRelease",
-            "version" : "5.021"
+            "version" : "5.023"
          },
          {
             "class" : "Dist::Zilla::Plugin::CheckPrereqsIndexed",
@@ -632,12 +637,12 @@
          {
             "class" : "Dist::Zilla::Plugin::ConfirmRelease",
             "name" : "@Apocalyptic/ConfirmRelease",
-            "version" : "5.021"
+            "version" : "5.023"
          },
          {
             "class" : "Dist::Zilla::Plugin::UploadToCPAN",
             "name" : "@Apocalyptic/UploadToCPAN",
-            "version" : "5.021"
+            "version" : "5.023"
          },
          {
             "class" : "Dist::Zilla::Plugin::ArchiveRelease",
@@ -675,7 +680,7 @@
                "Dist::Zilla::Plugin::Git::Tag" : {
                   "branch" : null,
                   "signed" : 0,
-                  "tag" : "release-1.004",
+                  "tag" : "release-1.005",
                   "tag_format" : "release-%v",
                   "tag_message" : "Tagged release-%v",
                   "time_zone" : "local"
@@ -716,47 +721,47 @@
          {
             "class" : "Dist::Zilla::Plugin::FinderCode",
             "name" : ":InstallModules",
-            "version" : "5.021"
+            "version" : "5.023"
          },
          {
             "class" : "Dist::Zilla::Plugin::FinderCode",
             "name" : ":IncModules",
-            "version" : "5.021"
+            "version" : "5.023"
          },
          {
             "class" : "Dist::Zilla::Plugin::FinderCode",
             "name" : ":TestFiles",
-            "version" : "5.021"
+            "version" : "5.023"
          },
          {
             "class" : "Dist::Zilla::Plugin::FinderCode",
             "name" : ":ExecFiles",
-            "version" : "5.021"
+            "version" : "5.023"
          },
          {
             "class" : "Dist::Zilla::Plugin::FinderCode",
             "name" : ":ShareFiles",
-            "version" : "5.021"
+            "version" : "5.023"
          },
          {
             "class" : "Dist::Zilla::Plugin::FinderCode",
             "name" : ":MainModule",
-            "version" : "5.021"
+            "version" : "5.023"
          },
          {
             "class" : "Dist::Zilla::Plugin::FinderCode",
             "name" : ":AllFiles",
-            "version" : "5.021"
+            "version" : "5.023"
          },
          {
             "class" : "Dist::Zilla::Plugin::FinderCode",
             "name" : ":NoFiles",
-            "version" : "5.021"
+            "version" : "5.023"
          },
          {
             "class" : "Dist::Zilla::Plugin::FinderCode",
             "name" : "@Apocalyptic/MetaProvides::Package/AUTOVIV/:InstallModulesPM",
-            "version" : "5.021"
+            "version" : "5.023"
          }
       ],
       "zilla" : {
@@ -764,7 +769,7 @@
          "config" : {
             "is_trial" : "0"
          },
-         "version" : "5.021"
+         "version" : "5.023"
       }
    },
    "x_author_pledge" : {
@@ -772,6 +777,7 @@
    },
    "x_authority" : "cpan:APOCAL",
    "x_contributors" : [
+      "Nigel Gregoire <nigelg@airg.com>",
       "Olivier Mengué <dolmen@cpan.org>",
       "Pedro Melo <melo@simplicidade.org>"
    ]
