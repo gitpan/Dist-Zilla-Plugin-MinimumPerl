@@ -5,7 +5,7 @@ NAME
 
 VERSION
 
-      This document describes v1.005 of Dist::Zilla::Plugin::MinimumPerl - released October 31, 2014 as part of Dist-Zilla-Plugin-MinimumPerl.
+      This document describes v1.006 of Dist::Zilla::Plugin::MinimumPerl - released October 31, 2014 as part of Dist-Zilla-Plugin-MinimumPerl.
 
 DESCRIPTION
 
@@ -14,10 +14,6 @@ DESCRIPTION
 
             # In your dist.ini:
             [MinimumPerl]
-
-    This plugin will search for files matching /\.(t|pl|pm)$/i in the lib/,
-    inc/, and t/ directories. If you need it to scan a different directory
-    and/or a different extension please let me know.
 
 ATTRIBUTES
 
@@ -31,6 +27,33 @@ ATTRIBUTES
     The default is: undefined ( automatically detect it )
 
     Example: 5.008008
+
+CONFIGURATION OPTIONS
+
+    The plugin uses FileFinders for finding files to scan. The predefined
+    finders are listed in "default_finders" in
+    Dist::Zilla::Role::FileFinderUser. You can define your own with the
+    [FileFinder::ByName] and [FileFinder::Filter] plugins.
+
+    Additionally, all files whose encoding has been specified as bytes are
+    omitted from consideration. (See [Encoding] for more information.)
+
+    Each prerequisite phase is configured separately:
+
+ runtime_finder
+
+    Finds files to scan for runtime prerequisites. The default value is
+    :InstallModules and :ExecFiles (see also Dist::Zilla::Plugin::ExecDir.
+
+ test_finder
+
+    Finds files to scan for test prerequisites. The default value is
+    :TestFiles.
+
+ configure_finder
+
+    Finds files to scan for configure prerequisites. The default value is
+    :IncModules.
 
 SEE ALSO
 
@@ -178,6 +201,8 @@ AUTHOR
     Apocalypse <APOCAL@cpan.org>
 
  CONTRIBUTORS
+
+      * Karen Etheridge <ether@cpan.org>
 
       * Nigel Gregoire <nigelg@airg.com>
 

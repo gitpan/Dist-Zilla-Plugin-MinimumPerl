@@ -8,8 +8,8 @@
 #
 use strict; use warnings;
 package Dist::Zilla::Plugin::MinimumPerl;
-# git description: release-1.004-3-ga1491f9
-$Dist::Zilla::Plugin::MinimumPerl::VERSION = '1.005';
+# git description: release-1.005-7-g9a97c25
+$Dist::Zilla::Plugin::MinimumPerl::VERSION = '1.006';
 our $AUTHORITY = 'cpan:APOCAL';
 
 # ABSTRACT: Detects the minimum version of Perl required for your dist
@@ -21,19 +21,19 @@ use MooseX::Types::Perl 0.101340 qw( LaxVersionStr );
 with(
 	'Dist::Zilla::Role::PrereqSource' => { -version => '5.006' }, # for the updated encoding system in dzil, RJBS++
 	'Dist::Zilla::Role::FileFinderUser' => {
-		-version => '4.200006',	# for :IncModules
-		finder_arg_names => [ 'perl_Modules' ],
-		method => 'found_modules',
-		default_finders => [ ':InstallModules' ]
+		finder_arg_names => [ 'runtime_finder' ],
+		method => 'found_runtime',
+		default_finders => [ ':InstallModules', ':ExecFiles' ]
 	},
 	'Dist::Zilla::Role::FileFinderUser' => {
-		finder_arg_names => [ 'perl_Tests' ],
+		finder_arg_names => [ 'test_finder' ],
 		method => 'found_tests',
 		default_finders => [ ':TestFiles' ]
 	},
 	'Dist::Zilla::Role::FileFinderUser' => {
-		finder_arg_names => [ 'perl_Inc' ],
-		method => 'found_inc',
+		-version => '4.200006',	# for :IncModules
+		finder_arg_names => [ 'configure_finder' ],
+		method => 'found_configure',
 		default_finders => [ ':IncModules' ]
 	},
 );
@@ -85,9 +85,9 @@ sub register_prereqs {
 		}
 	} else {
 		# Go through our 3 phases
-		$self->_scan_file( 'runtime', $_ ) for @{ $self->found_modules };
+		$self->_scan_file( 'runtime', $_ ) for @{ $self->found_runtime };
 		$self->_finalize( 'runtime' );
-		$self->_scan_file( 'configure', $_ ) for @{ $self->found_inc };
+		$self->_scan_file( 'configure', $_ ) for @{ $self->found_configure };
 		$self->_finalize( 'configure' );
 		$self->_scan_file( 'test', $_ ) for @{ $self->found_tests };
 		$self->_finalize( 'test' );
@@ -99,8 +99,6 @@ sub _scan_file {
 
 	# We don't parse files marked with the 'bytes' encoding as they're special - see RT#96071
 	return if $file->is_bytes;
-	# Only check .t and .pm/pl files, thanks RT#67355 and DOHERTY
-	return unless $file->name =~ /\.(?:t|p[ml])$/i;
 
 	# TODO skip "bad" files and not die, just warn?
 	my $pmv = Perl::MinimumVersion->new( \$file->content );
@@ -163,7 +161,7 @@ Dist::Zilla::Plugin::MinimumPerl - Detects the minimum version of Perl required 
 
 =head1 VERSION
 
-  This document describes v1.005 of Dist::Zilla::Plugin::MinimumPerl - released October 31, 2014 as part of Dist-Zilla-Plugin-MinimumPerl.
+  This document describes v1.006 of Dist::Zilla::Plugin::MinimumPerl - released October 31, 2014 as part of Dist-Zilla-Plugin-MinimumPerl.
 
 =head1 DESCRIPTION
 
@@ -172,9 +170,6 @@ for your dist and adds it to the prereqs.
 
 	# In your dist.ini:
 	[MinimumPerl]
-
-This plugin will search for files matching C</\.(t|pl|pm)$/i> in the C<lib/>, C<inc/>, and C<t/> directories.
-If you need it to scan a different directory and/or a different extension please let me know.
 
 =head1 ATTRIBUTES
 
@@ -186,6 +181,35 @@ If this is specified, this module will not attempt to automatically detect the m
 The default is: undefined ( automatically detect it )
 
 Example: 5.008008
+
+=head1 CONFIGURATION OPTIONS
+
+The plugin uses L<FileFinders|Dist::Zilla::Role::FileFinder> for finding files
+to scan.  The predefined finders are listed in
+L<Dist::Zilla::Role::FileFinderUser/default_finders>.
+You can define your own with the
+L<[FileFinder::ByName]|Dist::Zilla::Plugin::FileFinder::ByName> and
+L<[FileFinder::Filter]|Dist::Zilla::Plugin::FileFinder::Filter> plugins.
+
+Additionally, all files whose encoding has been specified as C<bytes> are
+omitted from consideration.  (See L<[Encoding]|Dist::Zilla::Plugin::Encoding>
+for more information.)
+
+Each prerequisite phase is configured separately:
+
+=head2 C<runtime_finder>
+
+Finds files to scan for runtime prerequisites.  The default value is
+C<:InstallModules> and C<:ExecFiles> (see also
+L<Dist::Zilla::Plugin::ExecDir>.
+
+=head2 C<test_finder>
+
+Finds files to scan for test prerequisites. The default value is C<:TestFiles>.
+
+=head2 C<configure_finder>
+
+Finds files to scan for configure prerequisites. The default value is C<:IncModules>.
 
 =head1 SEE ALSO
 
@@ -355,9 +379,13 @@ Apocalypse <APOCAL@cpan.org>
 
 =head2 CONTRIBUTORS
 
-=for stopwords Nigel Gregoire Olivier Mengué Pedro Melo
+=for stopwords Karen Etheridge Nigel Gregoire Olivier Mengué Pedro Melo
 
 =over 4
+
+=item *
+
+Karen Etheridge <ether@cpan.org>
 
 =item *
 

@@ -26,7 +26,7 @@ no_index:
 provides:
   Dist::Zilla::Plugin::MinimumPerl:
     file: lib/Dist/Zilla/Plugin/MinimumPerl.pm
-    version: '1.005'
+    version: '1.006'
 requires:
   Dist::Zilla::Role::FileFinderUser: '4.200006'
   Dist::Zilla::Role::PrereqSource: '5.006'
@@ -42,7 +42,7 @@ resources:
   homepage: http://search.cpan.org/dist/Dist-Zilla-Plugin-MinimumPerl/
   license: http://dev.perl.org/licenses/
   repository: git://github.com/apocalypse/perl-dist-zilla-plugin-minimumperl.git
-version: '1.005'
+version: '1.006'
 x_BuiltWith:
   modules:
     Dist::Zilla::Role::FileFinderUser: '5.023'
@@ -279,7 +279,7 @@ x_Dist_Zilla:
     -
       class: Dist::Zilla::Plugin::MinimumPerl
       name: '@Apocalyptic/MinimumPerl'
-      version: '1.004'
+      version: '1.005'
     -
       class: Dist::Zilla::Plugin::Bugtracker
       name: '@Apocalyptic/Bugtracker'
@@ -510,7 +510,7 @@ x_Dist_Zilla:
         Dist::Zilla::Plugin::Git::Tag:
           branch: ~
           signed: '0'
-          tag: release-1.005
+          tag: release-1.006
           tag_format: release-%v
           tag_message: 'Tagged release-%v'
           time_zone: local
@@ -582,6 +582,7 @@ x_author_pledge:
   version: '1'
 x_authority: cpan:APOCAL
 x_contributors:
+  - 'Karen Etheridge <ether@cpan.org>'
   - 'Nigel Gregoire <nigelg@airg.com>'
   - 'Olivier Mengué <dolmen@cpan.org>'
   - 'Pedro Melo <melo@simplicidade.org>'

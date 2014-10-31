@@ -16,6 +16,12 @@
   </developer>
   <helper>
     <foaf:Person>
+      <foaf:name>Karen Etheridge</foaf:name>
+      <foaf:mbox rdf:resource="mailto:ether@cpan.org" />
+    </foaf:Person>
+  </helper>
+  <helper>
+    <foaf:Person>
       <foaf:name>Nigel Gregoire</foaf:name>
       <foaf:mbox rdf:resource="mailto:nigelg@airg.com" />
     </foaf:Person>
